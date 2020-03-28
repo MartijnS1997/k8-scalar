@@ -1,6 +1,6 @@
 # Tutorial
 For this K8-Scalar 101, we will go over the steps to implement and evaluate elastic scaling policies for container-orchestrated database clusters using the Advanced Riemann-Based Autoscaler (ARBA). Furthermore, additional details about infrastructure and operation are appended. 
-  
+
 ## (1) Setup a Kubernetes cluster, Helm and install the Heapster monitoring service
 
 The setup of a Kubernetes cluster depends on the underlying platform. The [Infrastructure](./tutorial.md#ii-infrastructure) section provides some information to setup a distributed cluster. 
@@ -12,23 +12,23 @@ This tutorial explains how to install [MiniKube](https://kubernetes.io/docs/task
 ### Prerequisites
 
  **Disclaimer**
- 
+
 This local minikube-based setup is not suitable for running scientific experiments. If you want accurate results for the example experiment on a single machine, your could try a minikube VM of 16 virtual CPU cores and 32 GB of virtual memory. But we have never tested this. Moreover Minikube only supports kubernetes clusters with one worker node (i.e. the minikube VM). it is better to run the different components of the K8-Scalar architecture on different VMs as illustrated in Section 3 of the related paper. See the __Infrastructure__ section at the end of this file for some advice on how to control the placement of Pods across VMs.  
 
 **System requirements**
   * Your local machine should support VT-x virtualization
   * To run a minikube cluster, a VM with 1 *virtual* CPU core and 2GB *virtual* memory is sufficient but the cassandra instances will not fit.
   * One local VM with minimally 2 virtual CPU cores and 4GB virtual memory must be able to run on your machine in order to run 1 Cassandra instance. A VM with 4 virtual CPU cores and 8GB virtual memory is required to run the entire tutorial with 2 Cassandra instances.
- 
+
 
 **Install git:** 
   * MacOS: https://git-scm.com/download/mac
   * Linux Debian: sudo apt-get install git
   * Linux CentOS: sudo yum install git
   * Windows: https://git-scm.com/download/win. GitBash is by default also installed. Open a GitBash session and keep it open during the rest of the experiment
- 
+
 **Clone the K8-scalar GitHub repository:** 
-  
+
 ```
 git clone https://github.com/k8-scalar/k8-scalar/ && export k8_scalar_dir=`pwd`/k8-scalar
 ```
@@ -160,7 +160,7 @@ helm init
 ## Deploy Heapster monitoring service
 Now with Kubernetes and Helm installed, you should be able to install services on Kubernetes using Helm.
 
-Let us add the monitoring capabilities of Heapstwe to the cluster using Helm. We install the _monitoring-core_ chart by the following command. This chart includes instantiated templates for the following Kubernetes services: Heapster, Grafana and the InfluxDb. 
+Let us add the monitoring capabilities of Heapster to the cluster using Helm. We install the _monitoring-core_ chart by the following command. This chart includes instantiated templates for the following Kubernetes services: Heapster, Grafana and the InfluxDb. 
 ```
 helm install ${k8_scalar_dir}/operations/monitoring-core
 ```
@@ -179,7 +179,28 @@ storage-provisioner                     1/1       Running   0          17m
 tiller-deploy-7594bf7b76-598xv          1/1       Running   0          7m
 ```
 
+## Deploy the metrics server
 
+To be able to use a horizontal pod autoscaler you also need to install the metrics server. This can be achieved by running:
+
+```bash
+kubectl apply -f ${k8_scalar_dir}/operations/metrics-server
+```
+
+You can verify that the monitoring service is running by entering the following command:
+
+```bash
+kubectl top nodes
+```
+
+For a minikube deployment this will show the minikube VM for other deployments this results in a listing of all the nodes of the cluster. 
+
+```
+NAME       CPU(cores)   CPU%      MEMORY(bytes)   MEMORY%   
+minikube   434m         10%       2049Mi          25%       
+```
+
+It may also be that the monitoring service shows the message that it hasn't collected any metrics yet. Retry to run the command a bit later and it should return an output like the example above.
 
 ## (2) Setup a Database Cluster
 This _cassandra-cluster_ chart uses a modified image which resolves a missing dependency in one of Google Cassandra's image. Of course, this chart can be replaced with a different database technology. Do mind that Scalar will have to be modified for the experiment with implementations of desired workload generators for the Cassandra database. The next step will provide more information about this modification.
@@ -213,6 +234,14 @@ overwrite in the following command MyRepository_DOCKERHUB_PASSWRD with your secr
 docker push ${myRepository}/experiment-controller
 ```
 Scalar is a fully distributed, extensible load testing tool with numerous features. Have a look at the [Scalar documentation](./scalar) for more information.
+
+**Note: ** to build a custom experiment controller, you'll have to add the `scalar-1.0.0.jar` in the`${k8_scalar_dir}/development/scalar` directory to your local maven repository. This can be done by running 
+
+```bash
+bash ${k8_scalar_dir}/development/scalar/add-scalar-jar.sh
+```
+
+
 
 ## (4) Deploying experiment-controller
 
@@ -390,8 +419,46 @@ java -jar lib/scalar-1.0.0.jar etc/platform.properties etc/experiment.properties
 ```
 After the experiment is finished, you can inspect run-data as explained in Step 5. The only difference is that all run-data is now stored in one file. 
 
-
 ## (9) Repeat steps 7 and 8 until you have found an elastic scaling policy that works for this workload
+
+## (10) installing a kubernetes horizontal pod autoscaler for the cassandra database service
+
+To deploy a horizontal pod autoscaler for the cassandra database service run:
+
+```bash
+helm install ${k8_scalar_dir}/operations/hpa/
+```
+
+This command will install the helm chart containing a specification for the horizontal pod autoscaler. You can inspect the status of the hpa instance by entering the following command:
+
+```bash
+kubectl describe hpa cassanda-autoscaler
+```
+
+You should get an output that looks like the following one:
+
+```
+Name:                                                  cassandra-autoscaler
+Namespace:                                             default
+Labels:                                                <none>
+Annotations:                                           <none>
+CreationTimestamp:                                     Sat, 28 Mar 2020 21:00:58 +0100
+Reference:                                             StatefulSet/cassandra
+Metrics:                                               ( current / target )
+  resource cpu on pods  (as a percentage of request):  12% (125m) / 80%
+Min replicas:                                          1
+Max replicas:                                          2
+Conditions:
+  Type            Status  Reason              Message
+  ----            ------  ------              -------
+  AbleToScale     True    ReadyForNewScale    the last scale time was sufficiently old as to warrant a new scale
+  ScalingActive   True    ValidMetricFound    the HPA was able to succesfully calculate a replica count from cpu resource utilization (percentage of request)
+  ScalingLimited  False   DesiredWithinRange  the desired count is within the acceptable range
+Events:           <none>
+
+```
+
+
 
 # II. Infrastructure
 You need to have a Kubernetes cluster, and the kubectl command-line tool must be configured to communicate with your cluster. For example, create a Kubernetes cluster on Amazon Web Services ([tutorial](https://kubernetes.io/docs/getting-started-guides/aws/)) or quickly bootstrap a best-practice cluster using the [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/) toolkit. K8-scalar has been tested on kubernetes v1.9.x and v1.14.x. 
