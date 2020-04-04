@@ -1,3 +1,4 @@
 .idea
 **/target
-./operations/secrets/
+./operations/secrets/config
+**/logs

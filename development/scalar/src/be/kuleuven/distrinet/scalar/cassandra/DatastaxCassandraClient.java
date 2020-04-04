@@ -33,7 +33,7 @@ public class DatastaxCassandraClient {
         
         session = cluster.connect();
 
-//        createSchema();
+        createSchema();
 
 //        System.out.printf("[CASSANDRA] Connected to cluster: %s%n", cluster.getMetadata().getClusterName());
     }
@@ -104,7 +104,7 @@ public class DatastaxCassandraClient {
         return result;
     }
 
-   /* public void close() {
+   public void close() {
         cluster.close();
-    }*/
+    }
 }

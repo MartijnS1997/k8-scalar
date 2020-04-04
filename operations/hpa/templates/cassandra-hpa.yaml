@@ -10,5 +10,4 @@ spec:
     apiVersion: "apps/v1beta1"
     kind: StatefulSet
     name: cassandra
-  targetCPUUtilizationPercentage: 80
-  # allow to fetch data from heapster
+  targetCPUUtilizationPercentage: 100

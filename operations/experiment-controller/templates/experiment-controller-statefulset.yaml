@@ -23,7 +23,7 @@ spec:
             topologyKey: "kubernetes.io/hostname" 
       containers:
       - name: experiment-controller
-        image: martijns1997/experiment-controller:latest
+        image: martijns1997/experiment-controller:0.0.2
         volumeMounts:
         - name: kubeconfig
           mountPath: /root/.kube

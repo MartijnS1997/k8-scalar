@@ -49,6 +49,7 @@ spec:
             - /metrics-server
             - --kubelet-insecure-tls
             - --kubelet-preferred-address-types=InternalIP
+            - --metric-resolution=10s
           # nodeSelector:
             # kubernetes.io/os: linux
             # kubernetes.io/arch: "amd64"

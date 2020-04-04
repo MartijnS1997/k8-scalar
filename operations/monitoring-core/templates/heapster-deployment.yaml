@@ -20,5 +20,6 @@ spec:
         - --source=kubernetes:https://kubernetes.default
         - --sink=influxdb:http://monitoring-influxdb:8086
         - --sink=riemann:http://riemann:5555?batchsize=1
+        - --metric_resolution=10s
         - --api-server=true
         - --v=8
