@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: experiment-controller
+spec:
+  serviceName: experiment-controller
+  replicas: 1
+  selector:
+    matchLabels:
+      app: experiment-controller
+  template:
+    metadata:
+      labels:
+        app: experiment-controller
+        technology: scalar
+    spec:
+      nodeSelector:
+        monitoringNode: "yes"
+      containers:
+      - name: experiment-controller
+        image: martijns1997/experiment-controller:0.0.2
+        volumeMounts:
+        - name: kubeconfig
+          mountPath: /root/.kube
+        - name: resultdata
+          mountPath: /exp/var
+      volumes:
+        - name: kubeconfig
+          secret:
+            secretName: kubeconfig
+        - name: resultdata
+          hostPath:
+            path: /data/results

@@ -1,0 +1,13 @@
+apiVersion: "autoscaling/v1"
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cassandra-autoscaler
+spec:
+  maxReplicas: 2
+  minReplicas: 1
+  scaleTargetRef:
+    # api version of the StatefulSet
+    apiVersion: "apps/v1beta1"
+    kind: StatefulSet
+    name: cassandra
+  targetCPUUtilizationPercentage: 100
