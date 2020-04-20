@@ -2,3 +2,4 @@
 **/target
 ./operations/secrets/config
 **/logs
+**/node_modules

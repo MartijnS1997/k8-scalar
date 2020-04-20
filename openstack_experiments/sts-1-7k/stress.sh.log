@@ -1,0 +1,4 @@
+[INFO]    Stressing Cassandra with 4000 requests per second for 600 seconds
+[INFO]    Stressing Cassandra with 5000 requests per second for 600 seconds
+[INFO]    Stressing Cassandra with 6000 requests per second for 600 seconds
+[INFO]    Stressing Cassandra with 7000 requests per second for 600 seconds

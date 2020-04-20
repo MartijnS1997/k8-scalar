@@ -1,0 +1,28 @@
+{ "results": "
+
+Experiment consisting of 1 runs and 1 request types:
+	CassandraWriteRequest
+
+
+Load,          Duration,      Troughput,     Capacity,      Slow requests, Timing accuracy
+------------------------------------------------------------------------------------------
+2000,          600s,          1185426,       1975.71,       0.008%,        2.356ms        
+
+
+Breakdown of residence times for CassandraWriteRequest requests:
+
+Load,          Min,           Max,           Mean,          Std. dev.,     Shape,         Scale          (successful)   (failed)       (error)        (conn_problem) (timed_out)    (redirected)   (no_result)    
+2000           0.469          702.929        6.58           12.59          0.273          24.092         1185432        0              0              0              0              0              0              
+
+
+Percentiles of sampled residence times (only an approximation if residence_times_sample_fraction is set):
+
+CassandraWriteRequest (run 1, 2000 users):
+	50.0%	of requests handled in 3.524ms.
+	90.0%	of requests handled in 13.668ms.
+	95.0%	of requests handled in 19.841ms.
+	99.0%	of requests handled in 44.603ms.
+	99.9%	of requests handled in 154.95ms.
+	99.99%	of requests handled in 308.555ms.
+
+" }
