@@ -1,0 +1,10 @@
+Note on the network usage during the experiment
+We experienced a couple of timeout errors while we were scaling up.
+The same observation is also visible in the 'x.dat' files in the openstack_experiments/hpa_2/ folder.
+This is potentially a compatability issue between kubernetes and cassandra
+The effect of the dropped packages is a slight drop in network usage 
+but after upscaling the environment stabilizes and the network usage stabilizes.
+More interesting is the fact that the network usage drops on both instances
+while the CPU Usage remains about the same (or at least doesn't drop as noticebly)
+
+==> Weirdness with cassandra
